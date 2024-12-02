@@ -18,6 +18,14 @@ type album struct {
     Price  float64 `json:"price"`
 }
 
+// Users represents data about a record album.
+type user struct {
+    ID     string  `json:"id" gorm:"primaryKey"`
+    Name  string  `json:"name"`
+    Phone string  `json:"phone"`
+    Email  string `json:"email"`
+}
+
 var db *gorm.DB
 var err error
 
@@ -75,7 +83,18 @@ func getAlbumByID(c *gin.Context) {
     }
     c.IndentedJSON(http.StatusOK, album)
 }
+func createUsers(c *gin.Context) {
+    var newUser models.user    
 
+    // Call BindJSON to bind the received JSON to newAlbum.
+    if err := c.BindJSON(&newUser); err != nil {
+        return
+    }
+
+    // Add the new album to the database.
+    db.Create(&newUser)
+    c.IndentedJSON(http.StatusCreated, newUser)
+}
 func main() {
     initDB()
 
@@ -83,6 +102,7 @@ func main() {
     router.GET("/albums", getAlbums)
     router.GET("/albums/:id", getAlbumByID)
     router.POST("/albums", postAlbums)
+    router.POST("/users", createUsers)
 
     router.Run("localhost:8080")
 }
